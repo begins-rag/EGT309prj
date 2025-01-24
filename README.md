@@ -3,4 +3,4 @@
 Timothy - Model Data
 Roshan - Data Cleaning
 Terence - Model Training
-Thaqif - Model Inference
+Thajif - Model Inference
