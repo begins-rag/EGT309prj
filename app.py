@@ -4,11 +4,11 @@ import pickle
 import numpy as np
 from werkzeug.utils import secure_filename
 import os
-from datetime import datetime, timedelta
+import requests
 
 app = Flask(__name__)
 
-# Configure upload folder and model path
+# Existing configurations
 UPLOAD_FOLDER = 'uploads'
 MODEL_PATH = 'models/lightgbm_model.pkl'
 ALLOWED_EXTENSIONS = {'csv'}
@@ -24,6 +24,7 @@ except Exception as e:
     print(f"Error loading model: {str(e)}")
     model = None
 
+# Existing helper functions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -53,12 +54,59 @@ def preprocess_data(df):
         print(f"Error in preprocessing: {str(e)}")
         raise Exception(f"Error in preprocessing: {str(e)}")
 
+# New Ollama Chat Route
+@app.route('/ollama-chat', methods=['POST'])
+def ollama_chat():
+    try:
+        # Get chat data from request
+        chat_data = request.json
+        
+        # Validate input
+        if not chat_data or 'message' not in chat_data:
+            return jsonify({'error': 'No message provided'}), 400
+        
+        # Prepare request to local Ollama API
+        ollama_url = 'http://localhost:11500/api/chat'
+        
+        # Construct full request payload
+        payload = {
+            'model': 'llama3.2:1b',
+            'messages': [
+                {
+                    'role': 'system', 
+                    'content': 'You are an AI assistant focused on helping users understand HDB (Housing & Development Board) pricing in Singapore. Provide helpful, concise, and accurate information.'
+                },
+                {
+                    'role': 'user', 
+                    'content': chat_data['message']
+                }
+            ],
+            'stream': False
+        }
+        
+        # Send request to Ollama
+        response = requests.post(ollama_url, json=payload)
+        
+        # Check response
+        if response.status_code != 200:
+            return jsonify({'error': 'Failed to get response from Ollama'}), 500
+        
+        # Extract and return AI response
+        ai_response = response.json()['message']['content']
+        return jsonify({'response': ai_response})
+    
+    except Exception as e:
+        print(f"Error in Ollama chat: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Existing routes
 @app.route('/')
 def home():
-    return render_template('k8sUI.html')
+    return render_template('K8sUI.html')
 
 @app.route('/forecast', methods=['POST'])
 def generate_forecast():
+    # Existing forecast generation code remains the same
     if model is None:
         return jsonify({'error': 'Model not loaded'}), 500
         
