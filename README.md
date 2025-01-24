@@ -1,6 +1,6 @@
 # EGT309prj
 
-Roshan - Model Cleaning
-Timothy - Model Transformation
+Timothy - Model Data
+Roshan - Data Cleaning
 Terence - Model Training
 Thaqif - Model Inference
