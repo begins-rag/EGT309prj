@@ -7,7 +7,7 @@ import lightgbm as lgb
 from catboost import CatBoostRegressor
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-SAVE_PATH = r"C:\Users\scryo\Downloads\Data_Cleaning\EGT309prj\src"  # Adjust this path as needed
+SAVE_PATH = r"c:\Users\User\EGT309prj\src"  # Adjust this path as needed
 
 class ModelTrainingServer(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -73,23 +73,21 @@ class ModelTrainingServer(BaseHTTPRequestHandler):
                     "catboost_model": cat_model_path
                 }
             }
+            # Send success response
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(response).encode())
+            self.wfile.write(json.dumps({'status': 'success'}).encode())
 
         except Exception as e:
+            # Handle exceptions and send failure response
             self.send_response(400)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"error": str(e)}).encode())
-
-# Start the server
-def run(server_class=HTTPServer, handler_class=ModelTrainingServer, port=8080):
-    server_address = ('', port)
-    httpd = server_class(server_address, handler_class)
-    print(f'Starting server on port {port}...')
-    httpd.serve_forever()
+            self.wfile.write(json.dumps({'error': str(e)}).encode())
 
 if __name__ == '__main__':
-    run(port=8080)  # Change port if needed
+    server_address = ('', 5002)  # Running on port 5002
+    httpd = HTTPServer(server_address, ModelTrainingServer)
+    print("Model server running on port 5002...")
+    httpd.serve_forever()

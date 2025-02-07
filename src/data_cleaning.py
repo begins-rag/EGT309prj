@@ -7,9 +7,11 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from geopy.geocoders import Nominatim
 import time
+import requests  # For sending HTTP requests
 
 
 PORT = 5001
+MODEL_SERVER_URL = 'http://localhost:5002'  # URL for the model training server
 
 class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
@@ -50,6 +52,8 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
 
         # Remove all duplicates and keep only unique rows
         df_cleaned = df.drop_duplicates(keep='first')  # Keep the first occurrence of each duplicate
+
+        df_cleaned = df.dropna()
 
         df = df_cleaned.applymap(lambda x: x.strip() if isinstance(x, str) else x)
 
@@ -260,10 +264,32 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
 
         print(df)
         print("end of code")
+        self.send_data_to_model_server(df)
 
 
         # # file_path = r'C:\Users\scryo\OneDrive\Documents\NanyangPolytechnic\Y3S2\Kubernetes\cleaned_resale_data.csv'  # Save to a specific location in this environment
         # df.to_csv(file_path, index=False)
+
+    def send_data_to_model_server(self, df):
+        # Prepare data for the model training server
+        X_train = df.drop('Resale_Price', axis=1).values.tolist()  # Assuming 'Resale_Price' is the target
+        y_train = df['Resale_Price'].tolist()
+
+        # Create the data payload
+        payload = {
+            'X_train': X_train,
+            'y_train': y_train
+        }
+
+        # Send data to model server using POST request
+        try:
+            response = requests.post(MODEL_SERVER_URL, json=payload)
+            if response.status_code == 200:
+                print("Data sent to model server successfully!")
+            else:
+                print(f"Failed to send data to model server: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"Error sending data to model server: {str(e)}")
 
 if __name__ == "__main__":
     with socketserver.TCPServer(("", PORT), FileReceiverHandler) as httpd:
