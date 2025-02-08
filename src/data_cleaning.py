@@ -263,33 +263,24 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
         df['Average_Storey'] = pd.to_numeric(df['Average_Storey'])
 
         print(df)
-        print("end of code")
-        self.send_data_to_model_server(df)
+        print("End of Process, Sending Cleaned Data to Model Training...")
 
-
-        # # file_path = r'C:\Users\scryo\OneDrive\Documents\NanyangPolytechnic\Y3S2\Kubernetes\cleaned_resale_data.csv'  # Save to a specific location in this environment
-        # df.to_csv(file_path, index=False)
-
-    def send_data_to_model_server(self, df):
-        # Prepare data for the model training server
-        X_train = df.drop('Resale_Price', axis=1).values.tolist()  # Assuming 'Resale_Price' is the target
+        # Separate features and target variable
+        X_train = df.drop(columns=['Resale_Price']).to_dict(orient='records')  # Convert DataFrame to JSON-friendly format
         y_train = df['Resale_Price'].tolist()
+        
+        payload = json.dumps({"X_train": X_train, "y_train": y_train})
 
-        # Create the data payload
-        payload = {
-            'X_train': X_train,
-            'y_train': y_train
-        }
-
-        # Send data to model server using POST request
+        # Send cleaned data to Model Training
         try:
-            response = requests.post(MODEL_SERVER_URL, json=payload)
+            response = requests.post(MODEL_SERVER_URL, data=payload, headers={'Content-Type': 'application/json'})
             if response.status_code == 200:
-                print("Data sent to model server successfully!")
+                print("Data sent successfully to model training!")
             else:
-                print(f"Failed to send data to model server: {response.status_code}")
-        except requests.exceptions.RequestException as e:
+                print(f"Failed to send data to model server: {response.status_code}", response.text)
+        except requests.RequestException as e:
             print(f"Error sending data to model server: {str(e)}")
+
 
 if __name__ == "__main__":
     with socketserver.TCPServer(("", PORT), FileReceiverHandler) as httpd:
