@@ -217,9 +217,22 @@
                             <tr>
                                 <th>Town</th>
                                 <th>Flat Type</th>
-                                <th>Floor Area</th>
-                                <th>Lease Remaining</th>
-                                <th>Price</th>
+                                <th>Floor Area (SQM)</th>
+                                <th>Flat Model</th>
+                                <th>Lease Commence Date</th>
+                                <th>Average Storey</th>
+                                <th>Latitude</th>
+                                <th>Longitude</th>
+                                <th>Year</th>
+                                <th>Month</th>
+                                <th>Day</th>
+                                <th>Block Num</th>
+                                <th>Block Alpha Encoded</th>
+                                <th>Street Name Encoded</th>
+                                <th>Floor Area Scaled</th>
+                                <th>Remaining Lease (Years)</th>
+                                <th>Remaining Lease (Months)</th>
+                                <th>Resale Price</th>
                                 <!-- Add more columns as needed -->
                             </tr>
                         </thead>
@@ -254,6 +267,7 @@
                     <!-- Chart will be rendered here -->
                     <p style="text-align: center; padding-top: 130px;">
                         Forecast visualization will appear here
+                        <canvas id="forecast-chart"></canvas>
                     </p>
                 </div>
             </section>
@@ -293,43 +307,47 @@
 
       // Function to parse and display CSV data
       function displayCSVData(csvData) {
-          const lines = csvData.split('\n');
-          
-          // Get headers from first row
-          const headers = lines[0].split(',').map(header => header.trim());
-          
-          // Create table header
-          const tableHead = document.querySelector('.data-table thead');
-          tableHead.innerHTML = `<tr>` + 
-              headers.map(header => `<th>${header}</th>`).join('') + 
-              `</tr>`;
-          
-          // Create table body with data
-          const tableBody = document.getElementById('data-preview-body');
-          tableBody.innerHTML = '';
-          
-          // Display first 10 rows of data (you can adjust this number)
-          const maxRows = Math.min(lines.length, 11);
-          
-          for (let i = 1; i < maxRows; i++) {
-              if (lines[i].trim() === '') continue;
-              
-              const row = lines[i].split(',');
-              const tr = document.createElement('tr');
-              
-              tr.innerHTML = row.map(cell => `<td>${cell.trim()}</td>`).join('');
-              tableBody.appendChild(tr);
-          }
-          
-          // Show total number of records
-          const totalRecords = lines.length - 1; // Subtract header row
-          const recordCount = document.createElement('p');
-          recordCount.textContent = `Total records: ${totalRecords}`;
-          document.querySelector('.data-preview').appendChild(recordCount);
+        const lines = csvData.split('\n');
 
-          // Enable forecast button
-          document.getElementById('forecast-button').disabled = false;
+        // Get headers from first row
+        const headers = lines[0].split(',').map(header => header.trim());
+
+        // Create table header
+        const tableHead = document.querySelector('.data-table thead');
+        tableHead.innerHTML = `<tr>` + 
+            headers.map(header => `<th>${header}</th>`).join('') + 
+            `</tr>`;
+
+        // Create table body with data
+        const tableBody = document.getElementById('data-preview-body');
+        tableBody.innerHTML = '';
+
+        // Display all data, but enable scrolling after 10 rows
+        const rowCount = lines.length - 1; // Excluding header
+        lines.slice(1).forEach((line, index) => {
+            if (line.trim() === '') return;
+
+            const row = line.split(',');
+            const tr = document.createElement('tr');
+            tr.innerHTML = row.map(cell => `<td>${cell.trim()}</td>`).join('');
+
+            // If more than 10 rows, add scroll effect
+            if (index >= 10) {
+                tr.style.display = 'table-row';
+            }
+
+            tableBody.appendChild(tr);
+        });
+
+        // Show total number of records
+        const recordCount = document.createElement('p');
+        recordCount.textContent = `Total records: ${rowCount}`;
+        document.querySelector('.data-preview').appendChild(recordCount);
+
+        // Enable forecast button
+        document.getElementById('forecast-button').disabled = false;
       }
+
 
       // Add drag and drop functionality
       const dropZone = document.querySelector('.file-upload');
@@ -442,6 +460,231 @@
                 this.textContent = 'Generate Forecast';
             }
         });
+
+        async function loadCleanedDataAndForecast() {
+            try {
+                console.log("Loading cleaned data...");
+                const response = await fetch('/auto_forecast', { method: 'POST' });
+                const result = await response.json();
+
+                if (result.error) {
+                    console.error("Error:", result.error);
+                    return;
+                }
+
+                const cleanedData = result.data_preview;
+                const forecastResult = result.forecast_result;
+
+                console.log("Cleaned Data Received:", cleanedData);
+                console.log("Forecast Result:", forecastResult);
+
+                // Populate data preview table
+                const tableBody = document.getElementById('data-preview-body');
+                tableBody.innerHTML = '';
+
+                cleanedData.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.Town}</td>
+                        <td>${row.Flat_Type}</td>
+                        <td>${row.Floor_Area_SQM}</td>
+                        <td>${row.Flat_Model}</td>
+                        <td>${row.Lease_Commence_Date}</td>
+                        <td>${row.Average_Storey}</td>
+                        <td>${row.Latitude}</td>
+                        <td>${row.Longitude}</td>
+                        <td>${row.Year}</td>
+                        <td>${row.Month_Num}</td>
+                        <td>${row.Day}</td>
+                        <td>${row.Block_Num}</td>
+                        <td>${row.Block_Alpha_Encoded}</td>
+                        <td>${row.Street_Name_Encoded}</td>
+                        <td>${row.Floor_Area_SQM_Scaled}</td>
+                        <td>${row.Remaining_Lease_Years}</td>
+                        <td>${row.Remaining_Lease_Months}</td>
+                        <td>${row.Resale_Price}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+
+                // Update forecast results
+                document.getElementById('avg-price').textContent = 
+                    `$${forecastResult.average_price.toLocaleString()}`;
+                document.getElementById('price-range').textContent = 
+                    `$${forecastResult.min_price.toLocaleString()} - $${forecastResult.max_price.toLocaleString()}`;
+
+                // Populate forecast table
+                const forecastTableBody = document.querySelector('.forecast-table tbody');
+                forecastTableBody.innerHTML = '';
+
+                forecastResult.detailed_forecasts.forEach(forecast => {
+                    const change = ((forecast.forecasted_price - forecast.current_price) / forecast.current_price * 100).toFixed(1);
+                    const changeColor = change >= 0 ? 'color: green' : 'color: red';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>$${forecast.current_price.toLocaleString()}</td>
+                        <td>$${forecast.forecasted_price.toLocaleString()}</td>
+                        <td style="${changeColor}">${change}%</td>
+                    `;
+                    forecastTableBody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error("Error loading cleaned data:", error);
+            }
+        }
+
+    window.onload = loadCleanedDataAndForecast;
+    let dataLoaded = false;  // Prevents reloading preview
+    let forecastGenerated = false; // Prevents re-running forecast
+
+    async function fetchAndDisplayData() {
+        if (dataLoaded) return; // Prevents multiple reloads
+
+        try {
+            console.log("🔄 Loading Cleaned Data...");
+            const response = await fetch('/load_cleaned_data');  // Fetch cleaned data
+
+            if (!response.ok) throw new Error("Failed to load data.");
+
+            const data = await response.json();
+            console.log("✅ Data Loaded!", data);
+
+            // Display first 10 rows only
+            const tableBody = document.getElementById('data-preview-body');
+            tableBody.innerHTML = ''; // Clear previous data
+            const topData = data.slice(0, 10); // Only first 10 rows
+
+            topData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.Town}</td>
+                    <td>${row.Flat_Type}</td>
+                    <td>${row.Floor_Area_SQM}</td>
+                    <td>${row.Flat_Model}</td>
+                    <td>${row.Lease_Commence_Date}</td>
+                    <td>${row.Average_Storey}</td>
+                    <td>${row.Latitude}</td>
+                    <td>${row.Longitude}</td>
+                    <td>${row.Year}</td>
+                    <td>${row.Month_Num}</td>
+                    <td>${row.Day}</td>
+                    <td>${row.Block_Num}</td>
+                    <td>${row.Block_Alpha_Encoded}</td>
+                    <td>${row.Street_Name_Encoded}</td>
+                    <td>${row.Floor_Area_SQM_Scaled}</td>
+                    <td>${row.Remaining_Lease_Years}</td>
+                    <td>${row.Remaining_Lease_Months}</td>
+                    <td>${row.Resale_Price}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            // Enable forecast button
+            document.getElementById('forecast-button').disabled = false;
+            dataLoaded = true; // Mark as complete
+            fetchAndGenerateForecast(); // Auto-trigger forecast
+
+        } catch (error) {
+            console.error("❌ Error loading data preview:", error);
+        }
+    }
+
+    async function fetchAndGenerateForecast() {
+        if (forecastGenerated) return; // Prevents re-running
+
+        try {
+            console.log("🔄 Generating Forecast...");
+            const response = await fetch('/forecast', { method: 'POST' });
+
+            if (!response.ok) throw new Error("Forecast generation failed.");
+
+            const result = await response.json();
+            console.log("✅ Forecast Generated!", result);
+
+            // Update results section
+            document.getElementById('avg-price').textContent = `$${result.average_price.toLocaleString()}`;
+            document.getElementById('price-range').textContent = `$${result.min_price.toLocaleString()} - $${result.max_price.toLocaleString()}`;
+
+            // Generate forecast table
+            const chartContainer = document.querySelector('.chart-container');
+            chartContainer.innerHTML = `
+                <div class="forecast-scroll-container">
+                    <table class="forecast-table">
+                        <thead>
+                            <tr>
+                                <th>Current Price</th>
+                                <th>Forecasted Price (1 Year)</th>
+                                <th>Change (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.detailed_forecasts.map(forecast => {
+                                const change = ((forecast.forecasted_price - forecast.current_price) / forecast.current_price * 100).toFixed(1);
+                                const changeColor = change >= 0 ? 'color: green' : 'color: red';
+                                return `
+                                    <tr>
+                                        <td>$${forecast.current_price.toLocaleString()}</td>
+                                        <td>$${forecast.forecasted_price.toLocaleString()}</td>
+                                        <td style="${changeColor}">${change}%</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <canvas id="forecastChart"></canvas> <!-- Chart Container -->
+            `;
+
+            // Call function to generate forecast chart
+            generateForecastChart(result.detailed_forecasts);
+
+            forecastGenerated = true; // Mark as complete
+        } catch (error) {
+            console.error("❌ Error generating forecast:", error);
+        }
+    }
+
+    function generateForecastChart(forecasts) {
+        const ctx = document.getElementById('forecastChart').getContext('2d');
+
+        const labels = forecasts.map((_, index) => `Record ${index + 1}`);
+        const currentPrices = forecasts.map(forecast => forecast.current_price);
+        const forecastedPrices = forecasts.map(forecast => forecast.forecasted_price);
+
+        if (window.myChart) window.myChart.destroy(); // Prevent duplicate charts
+
+        window.myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Current Price',
+                        data: currentPrices,
+                        borderColor: 'blue',
+                        fill: false
+                    },
+                    {
+                        label: 'Forecasted Price',
+                        data: forecastedPrices,
+                        borderColor: 'green',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    // Load cleaned data and auto-generate forecast ONCE on page load
+    window.onload = async () => {
+        await fetchAndDisplayData();
+    };
     </script>
 </body>
 </html>
