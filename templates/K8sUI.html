@@ -248,10 +248,6 @@
                         <h3>Price Range</h3>
                         <p id="price-range">-</p>
                     </div>
-                    <div class="result-card">
-                        <h3>Confidence Score</h3>
-                        <p id="confidence">-</p>
-                    </div>
                 </div>
 
                 <div class="chart-container">
@@ -404,8 +400,7 @@
                     `$${result.average_price.toLocaleString()}`;
                 document.getElementById('price-range').textContent = 
                     `$${result.min_price.toLocaleString()} - $${result.max_price.toLocaleString()}`;
-                document.getElementById('confidence').textContent = 
-                    `${result.confidence_score}%`;
+
 
                 // Update chart container with scrollable forecast table
                 const chartContainer = document.querySelector('.chart-container');

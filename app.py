@@ -5,7 +5,6 @@ import numpy as np
 from werkzeug.utils import secure_filename
 import os
 
-
 app = Flask(__name__)
 
 # Configure upload folder and model path
@@ -94,15 +93,11 @@ def generate_forecast():
             # Generate predictions
             predictions = model.predict(processed_df)
 
-            # Calculate average change percentage
-            avg_change_percentage = np.mean(np.abs((predictions - original_prices) / original_prices)) * 100
-
             # Create response dictionary
             result = {
                 'average_price': float(np.mean(predictions)),
                 'min_price': float(np.min(predictions)),
                 'max_price': float(np.max(predictions)),
-                'confidence_score': round(100 - avg_change_percentage, 1),
                 'detailed_forecasts': [
                     {
                         'current_price': float(original_prices[i]),
@@ -123,4 +118,4 @@ def generate_forecast():
     return jsonify({'error': 'Invalid file type'}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5010)
