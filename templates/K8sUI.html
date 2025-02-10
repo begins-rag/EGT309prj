@@ -180,7 +180,51 @@
   .forecast-table tr:nth-child(even) {
     background-color: #f2f2f2;
     }
-    
+       .chatbot-section {
+            border: 2px solid #2b6cb0;
+            padding: 2em;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            padding: 1em;
+            margin-bottom: 1em;
+            background-color: white;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 1em;
+        }
+
+        .chat-input input {
+            flex-grow: 1;
+            padding: 0.5em;
+            border: 1px solid #2b6cb0;
+            border-radius: 4px;
+        }
+
+        .message {
+            margin-bottom: 0.5em;
+            padding: 0.5em;
+            border-radius: 4px;
+        }
+
+        .user-message {
+            background-color: #e6f2ff;
+            text-align: right;
+        }
+
+        .ai-message {
+            background-color: #f0f9ff;
+            text-align: left;
+        }
 </style>
 <html lang="en">
 <head>
@@ -235,7 +279,6 @@
 
             <!-- Results Section -->
             <section class="results-section">
-                
                 <h2>Forecasting Results</h2>
                 <button class="styled-button" id="forecast-button">Generate Forecast</button>
                 
@@ -247,6 +290,10 @@
                     <div class="result-card">
                         <h3>Price Range</h3>
                         <p id="price-range">-</p>
+                    </div>
+                    <div class="result-card">
+                        <h3>Confidence Score</h3>
+                        <p id="confidence">-</p>
                     </div>
                 </div>
 
@@ -266,6 +313,7 @@
         </p>
     </main>
     <script>
+      // Paste the entire CSV File Handler code here
       // Function to handle file upload and preview
       document.getElementById('csv-upload').addEventListener('change', function(e) {
           const file = e.target.files[0];
@@ -300,9 +348,9 @@
           
           // Create table header
           const tableHead = document.querySelector('.data-table thead');
-          tableHead.innerHTML = `<tr>` + 
+          tableHead.innerHTML = '<tr>' + 
               headers.map(header => `<th>${header}</th>`).join('') + 
-              `</tr>`;
+              '</tr>';
           
           // Create table body with data
           const tableBody = document.getElementById('data-preview-body');
@@ -400,7 +448,8 @@
                     `$${result.average_price.toLocaleString()}`;
                 document.getElementById('price-range').textContent = 
                     `$${result.min_price.toLocaleString()} - $${result.max_price.toLocaleString()}`;
-
+                document.getElementById('confidence').textContent = 
+                    `${result.confidence_score}%`;
 
                 // Update chart container with scrollable forecast table
                 const chartContainer = document.querySelector('.chart-container');
