@@ -18,22 +18,23 @@ CHECK_MODEL_URL = 'http://localhost:5010/check_model'  # Endpoint to check if th
 class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         try:
-            # content_type = self.headers['Content-Type']
-            # # if 'application/json' not in content_type:  # Expect JSON
-            # #     self.send_response(400)
-            # #     self.end_headers()
-            # #     self.wfile.write(b'{"error": "Invalid Content-Type. Expected application/json"}')
-            # #     return
+            content_type = self.headers['Content-Type']
+            # if 'application/json' not in content_type:  # Expect JSON
+            #     self.send_response(400)
+            #     self.end_headers()
+            #     self.wfile.write(b'{"error": "Invalid Content-Type. Expected application/json"}')
+            #     return
 
-            # # Read the length of the incoming data  
-            # content_length = int(self.headers['Content-Length'])
-            # post_data = self.rfile.read(content_length)
+            # Read the length of the incoming data  
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
 
-            # # Save the file to the local filesystem
-            # boundary = content_type.split("boundary=")[-1].encode()
-            # _, file_data = post_data.split(boundary, 1)
-            # file_content = file_data.split(b"\r\n\r\n", 1)[-1].rsplit(b"\r\n", 1)[0]
-            
+            # Save the file to the local filesystem
+            boundary = content_type.split("boundary=")[-1].encode()
+            _, file_data = post_data.split(boundary, 1)
+            file_content = file_data.split(b"\r\n\r\n", 1)[-1].rsplit(b"\r\n", 1)[0]
+            df = pd.read_csv(BytesIO(file_content))  # Read CSV from extracted file content
+
             # # Load the uploaded file into a pandas DataFrame
             # try:
             #     df = pd.read_csv(BytesIO(file_content), encoding='utf-8')
@@ -43,33 +44,33 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
             #     self.wfile.write(json.dumps({"error": f"Failed to parse CSV: {str(e)}"}).encode())
             #     return
 
-            model_exists = False
-            try:
-                model_check_response = requests.get(CHECK_MODEL_URL)
-                if model_check_response.status_code == 200:
-                    model_status = model_check_response.json()
-                    model_exists = model_status.get("model_loaded", False)  # Corrected key
-            except requests.RequestException as e:
-                print(f"⚠ Warning: Could not check model existence in app.py: {str(e)}")
+            # model_exists = False
+            # try:
+            #     model_check_response = requests.get(CHECK_MODEL_URL)
+            #     if model_check_response.status_code == 200:
+            #         model_status = model_check_response.json()
+            #         model_exists = model_status.get("model_loaded", False)  # Corrected key
+            # except requests.RequestException as e:
+            #     print(f"⚠ Warning: Could not check model existence in app.py: {str(e)}")
 
-            # 🔹 Read the incoming data
-            content_type = self.headers['Content-Type']
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
+            # # 🔹 Read the incoming data
+            # content_type = self.headers['Content-Type']
+            # content_length = int(self.headers['Content-Length'])
+            # post_data = self.rfile.read(content_length)
 
-            # ✅ If model exists, clean data and return immediately (Skip file handling)
-            if model_exists:
-                df = pd.read_csv(BytesIO(post_data))  # Directly read CSV from raw data
-                print("✅ Model exists, skipping file handling...")
-            else:
-                # ✅ If model does NOT exist, perform file handling
-                print("⚠ Model does NOT exist, processing file normally...")
-                boundary = content_type.split("boundary=")[-1].encode()
-                _, file_data = post_data.split(boundary, 1)
-                file_content = file_data.split(b"\r\n\r\n", 1)[-1].rsplit(b"\r\n", 1)[0]
-                df = pd.read_csv(BytesIO(file_content))  # Read CSV from extracted file content
+            # # ✅ If model exists, clean data and return immediately (Skip file handling)
+            # if model_exists:
+            #     df = pd.read_csv(BytesIO(post_data))  # Directly read CSV from raw data
+            #     print("✅ Model exists, skipping file handling...")
+            # else:
+            #     # ✅ If model does NOT exist, perform file handling
+            #     print("⚠ Model does NOT exist, processing file normally...")
+            #     boundary = content_type.split("boundary=")[-1].encode()
+            #     _, file_data = post_data.split(boundary, 1)
+            #     file_content = file_data.split(b"\r\n\r\n", 1)[-1].rsplit(b"\r\n", 1)[0]
+            #     df = pd.read_csv(BytesIO(file_content))  # Read CSV from extracted file content
             
-            print("📥 Received raw data for cleaning...")
+            # print("📥 Received raw data for cleaning...")
             print("Columns:", df.columns)
             print(df.head())
 
