@@ -1,15 +1,19 @@
 import json
 import pandas as pd
-import os
 import joblib
+import requests
 from sklearn.model_selection import GridSearchCV
 import lightgbm as lgb
-from catboost import CatBoostRegressor
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import requests
 
+<<<<<<< HEAD
 SAVE_PATH = 'C:/Users/User/EGT309prj/EGT309prj/models'  # Save models here
 FORECAST_SERVER_URL = "http://localhost:5010/forecast"  # app.py URL
+=======
+APP_SERVER_URL = "http://localhost:5010/upload_model"  # URL of the app.py service
+CLEAN_SERVER_URL = "http://localhost:5001"  # URL of the app.py service
+>>>>>>> c4184fbebdff3d0c822bd147ad8279616bc1469a
 
 class ModelTrainingServer(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -48,6 +52,7 @@ class ModelTrainingServer(BaseHTTPRequestHandler):
             print(f"Best LightGBM Params: {lgb_grid.best_params_}")
             print(f"Best LightGBM RMSE: {-lgb_grid.best_score_:.2f}")
 
+<<<<<<< HEAD
             # # ---- CatBoost Hyperparameter Tuning ----
             # cat_model = CatBoostRegressor(random_state=42, verbose=0)
             # cat_param_grid = {
@@ -90,6 +95,22 @@ class ModelTrainingServer(BaseHTTPRequestHandler):
                 print("Forecasting request sent successfully. Stopping further processing.")
                 return  # Stops execution but keeps the server running
 
+=======
+            # Save model temporarily
+            model_filename = "C:/Users/User/EGT309prj/EGT309prj/models/lightgbm_model.pkl"
+            joblib.dump(lgb_grid.best_estimator_, model_filename)
+
+            # Send model to app.py
+            files = {'file': open(model_filename, 'rb')}
+            response = requests.post(APP_SERVER_URL, files=files)
+            response = requests.post(CLEAN_SERVER_URL, files=files)
+
+            if response.status_code == 200:
+                print("Model successfully sent to app.py")
+            else:
+                print("Failed to send model:", response.text)
+
+>>>>>>> c4184fbebdff3d0c822bd147ad8279616bc1469a
             # Send success response
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -102,6 +123,7 @@ class ModelTrainingServer(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({'error': str(e)}).encode())
+<<<<<<< HEAD
 
     def send_data_to_forecasting(self, file_path):
         """ Send the cleaned data to app.py for forecasting. """
@@ -120,6 +142,8 @@ class ModelTrainingServer(BaseHTTPRequestHandler):
         except Exception as e:
             print(f"Error sending data to app.py: {str(e)}")
             return False
+=======
+>>>>>>> c4184fbebdff3d0c822bd147ad8279616bc1469a
 
 if __name__ == '__main__':
     server_address = ('', 5002)  # Running on port 5002
