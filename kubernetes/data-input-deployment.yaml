@@ -21,7 +21,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: data-input-service
+  name: data-input
 spec:
   selector:
     app: data-input

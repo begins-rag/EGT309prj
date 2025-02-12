@@ -14,12 +14,12 @@ spec:
     spec:
       containers:
       - name: app
-        image: terenceyew/app:latest
+        image: terenceyew/app:latest 
         ports:
         - containerPort: 5010
         env:
         - name: DATA_CLEANING_URL
-          value: "http://data-cleaning-service:5001/clean-data"
+          value: "http://data-cleaning:5001/clean-data"
 ---
 apiVersion: v1
 kind: Service
