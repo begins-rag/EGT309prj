@@ -1,0 +1,8 @@
+flask
+pandas
+joblib
+numpy
+requests
+sklearn
+lightgbm
+geopy
