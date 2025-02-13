@@ -92,4 +92,4 @@ def run(server_class=HTTPServer, handler_class=ModelTrainingServer, port=8080):
     httpd.serve_forever()
 
 if __name__ == '__main__':
-    run(port=8080)  # Change port if needed
+    run(port=5002)  # Change port if needed
