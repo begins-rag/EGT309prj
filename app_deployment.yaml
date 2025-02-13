@@ -38,6 +38,6 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 5010
-      nodePort: 30007  # Choose a port between 30000-32767
-  type: NodePort
+      # nodePort: 30007  # Choose a port between 30000-32767
+  type: LoadBalancer
 
