@@ -6,22 +6,14 @@ from io import BytesIO
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from geopy.geocoders import Nominatim
-<<<<<<< HEAD
-import time
-=======
->>>>>>> eb032895014f0b4452f5e100aa5d314860a268a7
 import requests  # For sending HTTP requests
 
 
 PORT = 5001
-<<<<<<< HEAD
-MODEL_SERVER_URL = 'http://localhost:5002'  # URL for the model training server
-=======
 MODEL_SERVER_URL = 'http://localhost:5002'  # Model training server
 APP_SERVER_URL = 'http://localhost:5010/receive_cleaned_data'  # UI (forecasting) server
 CHECK_MODEL_URL = 'http://localhost:5010/check_model'  # Endpoint to check if the model exists
 
->>>>>>> eb032895014f0b4452f5e100aa5d314860a268a7
 
 class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
@@ -127,18 +119,12 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
             df['Floor_Area_SQM'] = df['Floor_Area_SQM'].astype(float)
             df['Flat_Type'] = df['Flat_Type'].str.title()
 
-<<<<<<< HEAD
-        df_cleaned = df.dropna()
-
-        df = df_cleaned.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-=======
             def extract_years(lease):
                 if isinstance(lease, str) and 'year' in lease:
                     return int(lease.split(' ')[0])  # Extract the years
                 return None
 
             df['Remaining_Years'] = df['Remaining_Lease'].apply(extract_years)
->>>>>>> eb032895014f0b4452f5e100aa5d314860a268a7
 
 
             def average_storey_range(storey):
@@ -352,129 +338,11 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"message": "Data processed and sent successfully"}).encode())
             
 
-<<<<<<< HEAD
-
-        # Label Encoder
-        label_encoder = LabelEncoder()
-        scaler = StandardScaler()
-        # Assuming your dataframe is named 'df'
-        # 1. Month: Split into Year, Month, and Date columns
-        df['Month'] = pd.to_datetime(df['Month'])
-
-        # Extract year, month, and day
-        df['Year'] = df['Month'].dt.year
-        df['Month_Num'] = df['Month'].dt.month
-        df['Day'] = df['Month'].dt.day
-
-        # Drop the original 'Month' column if you don't need it anymore
-        df = df.drop(columns=['Month'])
-
-        # Fit and transform the 'Town' column
-        df['Town'] = label_encoder.fit_transform(df['Town'])
-        mapping = {index: label for index, label in enumerate(label_encoder.classes_)}
-        print("Mapping:", mapping)
-
-        # 3. Flat_Type: One-hot encoding for Flat_Type
-        df['Flat_Type'] = label_encoder.fit_transform(df['Flat_Type'])
-        print("\n\n")
-        mapping = {index: label for index, label in enumerate(label_encoder.classes_)}
-        print("Mapping:", mapping)
-
-        # 4. Block: Convert to numeric label encoding        
-
-        # Extract numeric part and handle NaN values by filling with 0 (or another default value)
-        df['Block_Num'] = df['Block'].str.extract(r'(\d+)', expand=False).fillna('0').astype(int)
-
-        df['Block_Alpha'] = df['Block'].str.extract(r'([A-Za-z]+)', expand=False).fillna('0')  # Extract alphabets, fill '0' for missing
-
-        # Label encode the alphabetical column
-        df['Block_Alpha_Encoded'] = label_encoder.fit_transform(df['Block_Alpha'])
-
-        # Drop the original Block column (optional)
-        df.drop('Block', axis=1, inplace=True)
-        df.drop('Block_Alpha', axis=1, inplace=True)
-        print("\n\n")
-        mapping = {index: label for index, label in enumerate(label_encoder.classes_)}
-        print("Mapping:", mapping)
-
-        label_encoder = LabelEncoder()
-        scaler = StandardScaler()
-
-        # 5. Street_Name: One-hot encoding for Street_Name
-        df['Street_Name_Encoded'] = label_encoder.fit_transform(df['Street_Name'])
-        df.drop('Street_Name', axis=1, inplace=True)
-        print("\n\n")
-        mapping = {index: label for index, label in enumerate(label_encoder.classes_)}
-        print("Mapping:", mapping)
-
-        # 7. Floor_Area_SQM: Convert to numeric
-        df['Floor_Area_SQM'] = pd.to_numeric(df['Floor_Area_SQM'])
-        
-        df['Floor_Area_SQM_Scaled'] = scaler.fit_transform(df[['Floor_Area_SQM']])
-
-        # 8. Flat_Model: label encoding for Flat_Model
-        df['Flat_Model'] = label_encoder.fit_transform(df['Flat_Model'])
-        print("\n\n")
-        mapping = {index: label for index, label in enumerate(label_encoder.classes_)}
-        print("Mapping:", mapping)
-
-
-        # 10. Remaining_Lease: Extract remaining years and months
-        # Extract years from the 'Remaining_Lease' column
-        df['Remaining_Lease_Years'] = df['Remaining_Lease'].str.extract(r'(\d+)\s+years').astype(float)
-
-        # Extract months from the 'Remaining_Lease' column (if exists)
-        df['Remaining_Lease_Months'] = df['Remaining_Lease'].str.extract(r'(\d+)\s+months').astype(float)
-
-        # Fill missing months with 0
-        df['Remaining_Lease_Months'] = df['Remaining_Lease_Months'].fillna(0)
-
-        # Drop the 'Remaining_Lease' column after extraction
-        df.drop('Remaining_Lease', axis=1, inplace=True)
-
-        # Ensure both 'Remaining_Lease_Years' and 'Remaining_Lease_Months' columns are numeric and handle NaN values
-        df['Remaining_Lease_Years'] = pd.to_numeric(df['Remaining_Lease_Years'], errors='coerce')  # Convert to numeric, invalid parsing will become NaN
-        df['Remaining_Lease_Months'] = pd.to_numeric(df['Remaining_Lease_Months'], errors='coerce')
-
-        # Fill NaN values for years and months with suitable values (e.g., 0 for years and 0 for months)
-        df['Remaining_Lease_Years'] = df['Remaining_Lease_Years'].fillna(0).astype(int)
-        df['Remaining_Lease_Months'] = df['Remaining_Lease_Months'].fillna(0).astype(int)
-
-        # 11. Resale_Price: Convert to numeric (target variable)
-        df['Resale_Price'] = df['Resale_Price'].fillna(df['Resale_Price'].mean())  # Example: filling NaN with mean
-
-        # 12. Drop remaining years (if needed)
-        df.drop('Remaining_Years', axis=1, inplace=True)
-
-        # 13. **Average_Storey: Convert to numeric
-        df['Average_Storey'] = pd.to_numeric(df['Average_Storey'])
-
-        print(df)
-        print("End of Process, Sending Cleaned Data to Model Training...")
-
-        # Separate features and target variable
-        X_train = df.drop(columns=['Resale_Price']).to_dict(orient='records')  # Convert DataFrame to JSON-friendly format
-        y_train = df['Resale_Price'].tolist()
-        
-        payload = json.dumps({"X_train": X_train, "y_train": y_train})
-
-        # Send cleaned data to Model Training
-        try:
-            response = requests.post(MODEL_SERVER_URL, data=payload, headers={'Content-Type': 'application/json'})
-            if response.status_code == 200:
-                print("Data sent successfully to model training!")
-            else:
-                print(f"Failed to send data to model server: {response.status_code}", response.text)
-        except requests.RequestException as e:
-            print(f"Error sending data to model server: {str(e)}")
-
-=======
         except Exception as e:
             print(f"❌ Error in data cleaning: {str(e)}")
             self.send_response(500)
             self.end_headers()
             self.wfile.write(json.dumps({'error': str(e)}).encode())
->>>>>>> eb032895014f0b4452f5e100aa5d314860a268a7
 
 if __name__ == "__main__":
     with socketserver.TCPServer(("", PORT), FileReceiverHandler) as httpd:
