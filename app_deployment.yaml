@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
       - name: app
-        image: thaqif101/app:latest
+        image: thaqif101/app:latest  # Ensure this matches your Docker Hub image
+        imagePullPolicy: Always
         ports:
         - containerPort: 5010
         env:
@@ -37,4 +38,6 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 5010
-  type: LoadBalancer
+      nodePort: 30007  # Choose a port between 30000-32767
+  type: NodePort
+
