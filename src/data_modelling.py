@@ -6,8 +6,8 @@ from sklearn.model_selection import GridSearchCV
 import lightgbm as lgb
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-APP_SERVER_URL = "http://localhost:5010/upload_model"  # URL of the app.py service
-CLEAN_SERVER_URL = "http://localhost:5001"  # URL of the app.py service
+APP_SERVER_URL = "http://app-service:5010/upload_model"  # URL of the app.py service
+CLEAN_SERVER_URL = "http://data-cleaning-service:5001"  # URL of the app.py service
 
 class ModelTrainingServer(BaseHTTPRequestHandler):
     def do_POST(self):

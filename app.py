@@ -11,12 +11,12 @@ app = Flask(__name__)
 model = None
 
 # URL of data_cleaning.py service
-DATA_CLEANING_URL = "http://localhost:5001/clean-data"
+DATA_CLEANING_URL = "http://data-cleaning-service:5001/clean-data"
 
 @app.route('/')
 def home():
     """Render the homepage."""
-    return render_template('k8sUI.html')
+    return render_template('K8sUI.html')
 
 @app.route('/upload_model', methods=['POST'])
 def upload_model():
@@ -135,4 +135,4 @@ def generate_forecast():
 
 if __name__ == '__main__':
     print("🚀 Starting Forecasting Service on Port 5010...")
-    app.run(debug=True, port=5010, threaded=True)
+    app.run(debug=True, host="0.0.0.0", port=5010, threaded=True)

@@ -10,9 +10,9 @@ import requests  # For sending HTTP requests
 
 
 PORT = 5001
-MODEL_SERVER_URL = 'http://localhost:5002'  # Model training server
-APP_SERVER_URL = 'http://localhost:5010/receive_cleaned_data'  # UI (forecasting) server
-CHECK_MODEL_URL = 'http://localhost:5010/check_model'  # Endpoint to check if the model exists
+MODEL_SERVER_URL = 'http://data-modelling-service:5002'  # Model training server
+APP_SERVER_URL = 'http://app-service:5010/receive_cleaned_data'  # UI (forecasting) server
+CHECK_MODEL_URL = 'http://app-service:5010/check_model'  # Endpoint to check if the model exists
 
 
 class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
