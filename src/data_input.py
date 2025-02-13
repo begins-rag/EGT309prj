@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, jsonify
 import requests
 
-app = Flask(__name__)
+app = Flask(_name_)
 
 # Render an HTML form for file upload
 @app.route('/')
@@ -72,9 +72,5 @@ def upload_file():
         return jsonify({"error": "Failed to connect to backend", "details": str(e)}), 500
 
 
-if __name__ == '__main__':
-<<<<<<< HEAD
+if _name_ == '_main_':
     app.run(debug=True,port=5000)
-=======
-    app.run(debug=True, port=5000)
->>>>>>> eb032895014f0b4452f5e100aa5d314860a268a7
