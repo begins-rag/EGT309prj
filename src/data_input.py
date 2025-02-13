@@ -18,8 +18,50 @@ def upload_form():
 
     <div id="response"></div>
 
+    <h3>Data Cleaning Logs</h3>
+    <div id="log-container" style="max-height: 300px; overflow-y: scroll;">
+        <pre id="log-content"></pre>
+    </div>
+
+    <!-- Data Modelling Logs Section -->
+    <h3>Data Modelling Logs</h3>
+    <div id="modelling-log-container" style="max-height: 300px; overflow-y: scroll;">
+        <pre id="modelling-log-content"></pre>
+    </div>
+
     <script>
         const form = document.getElementById('upload-form');
+        const logContent = document.getElementById('log-content');
+        const modellingLogContent = document.getElementById('modelling-log-content');
+        
+        // Fetch the data cleaning logs
+        async function fetchDataCleaningLogs() {
+            try {
+                const response = await fetch('http://localhost:5001/logs');  // URL for data_cleaning.py logs
+                const logs = await response.text();
+                logContent.textContent = logs;  // Display the logs
+                logContent.scrollTop = logContent.scrollHeight;  // Scroll to the bottom
+            } catch (error) {
+                logContent.textContent = 'Error fetching data cleaning logs.';
+            }
+        }
+
+        // Fetch the data modelling logs
+        async function fetchDataModellingLogs() {
+            try {
+                const response = await fetch('http://localhost:5002/logs');  // URL for data_modelling.py logs
+                const logs = await response.text();
+                modellingLogContent.textContent = logs;  // Display the logs
+                modellingLogContent.scrollTop = modellingLogContent.scrollHeight;  // Scroll to the bottom
+            } catch (error) {
+                modellingLogContent.textContent = 'Error fetching data modelling logs.';
+            }
+        }
+
+        // Poll every 2 seconds for both data cleaning and data modelling logs
+        setInterval(fetchDataCleaningLogs, 2000);
+        setInterval(fetchDataModellingLogs, 2000);
+
         form.addEventListener('submit', async function(event) {
             event.preventDefault();  // Prevent the form from submitting normally
             const fileInput = document.getElementById('file-input');
@@ -44,6 +86,7 @@ def upload_form():
     </script>
 </body>
 </html>
+
     '''
 
 # Endpoint to handle file upload and forward the file to the data cleaning service
@@ -54,7 +97,7 @@ def upload_file():
         return jsonify({"error": "No file uploaded"}), 400
 
     # Send the file to the data cleaning service via a POST request
-    backend_url = 'http://data-cleaning-service:5001/clean-data'  # data_cleaning.py URL
+    backend_url = 'http://localhost:5001/clean-data'  # data_cleaning.py URL
     try:
         response = requests.post(
             backend_url,
@@ -73,4 +116,4 @@ def upload_file():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, port=5000)

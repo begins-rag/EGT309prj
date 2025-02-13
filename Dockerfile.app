@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 FROM python:3.9
 
 WORKDIR /EGT309prj/EGT309prj
@@ -9,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 FROM base AS app
 COPY app.py .
 CMD ["python", "app.py"]
-=======
+
 FROM python:3.9-slim
 
 # Set the working directory
@@ -31,4 +30,4 @@ EXPOSE 5010
 
 # Run the Flask application
 CMD ["python", "app.py"]
->>>>>>> 30478c28181ecd8f4db97d1d341a585d46d710d1
+

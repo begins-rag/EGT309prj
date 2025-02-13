@@ -6,75 +6,41 @@ from io import BytesIO
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from geopy.geocoders import Nominatim
-import requests  # For sending HTTP requests
-
+import requests
 
 PORT = 5001
-MODEL_SERVER_URL = 'http://data-modelling-service:5002'  # Model training server
-APP_SERVER_URL = 'http://app-service:5010/receive_cleaned_data'  # UI (forecasting) server
-CHECK_MODEL_URL = 'http://app-service:5010/check_model'  # Endpoint to check if the model exists
+LOG_FILE = "upload_logs.txt"
+MODEL_SERVER_URL = 'http://data-modelling-service:5002'
+APP_SERVER_URL = 'http://app-service:5010/receive_cleaned_data'
+CHECK_MODEL_URL = 'http://app-service:5010/check_model'
+
+
+def log_message(message):
+    """Append messages to a log file."""
+    with open(LOG_FILE, "a") as log_file:
+        log_file.write(message + "\n")
+    print(message)  # Still print for debugging
 
 
 class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             content_type = self.headers['Content-Type']
-            # if 'application/json' not in content_type:  # Expect JSON
-            #     self.send_response(400)
-            #     self.end_headers()
-            #     self.wfile.write(b'{"error": "Invalid Content-Type. Expected application/json"}')
-            #     return
-
-            # Read the length of the incoming data  
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
 
-            # Save the file to the local filesystem
             boundary = content_type.split("boundary=")[-1].encode()
             _, file_data = post_data.split(boundary, 1)
             file_content = file_data.split(b"\r\n\r\n", 1)[-1].rsplit(b"\r\n", 1)[0]
-            df = pd.read_csv(BytesIO(file_content))  # Read CSV from extracted file content
+            df = pd.read_csv(BytesIO(file_content))
 
-            # # Load the uploaded file into a pandas DataFrame
-            # try:
-            #     df = pd.read_csv(BytesIO(file_content), encoding='utf-8')
-            # except Exception as e:
-            #     self.send_response(400)
-            #     self.end_headers()
-            #     self.wfile.write(json.dumps({"error": f"Failed to parse CSV: {str(e)}"}).encode())
-            #     return
+            with open(LOG_FILE, "a") as log_file:
+                log_file.write("Received a file for processing.\n")
+                log_file.flush()  # Immediately flush the content to the file
 
-            # model_exists = False
-            # try:
-            #     model_check_response = requests.get(CHECK_MODEL_URL)
-            #     if model_check_response.status_code == 200:
-            #         model_status = model_check_response.json()
-            #         model_exists = model_status.get("model_loaded", False)  # Corrected key
-            # except requests.RequestException as e:
-            #     print(f"⚠ Warning: Could not check model existence in app.py: {str(e)}")
 
-            # # 🔹 Read the incoming data
-            # content_type = self.headers['Content-Type']
-            # content_length = int(self.headers['Content-Length'])
-            # post_data = self.rfile.read(content_length)
 
-            # # ✅ If model exists, clean data and return immediately (Skip file handling)
-            # if model_exists:
-            #     df = pd.read_csv(BytesIO(post_data))  # Directly read CSV from raw data
-            #     print("✅ Model exists, skipping file handling...")
-            # else:
-            #     # ✅ If model does NOT exist, perform file handling
-            #     print("⚠ Model does NOT exist, processing file normally...")
-            #     boundary = content_type.split("boundary=")[-1].encode()
-            #     _, file_data = post_data.split(boundary, 1)
-            #     file_content = file_data.split(b"\r\n\r\n", 1)[-1].rsplit(b"\r\n", 1)[0]
-            #     df = pd.read_csv(BytesIO(file_content))  # Read CSV from extracted file content
-            
-            # print("📥 Received raw data for cleaning...")
-            print("Columns:", df.columns)
-            print(df.head())
-
-            # 🔹 Check if the model exists in app.py
+            # 🔹 Check if the model exists
             model_exists = False
             try:
                 model_check_response = requests.get(CHECK_MODEL_URL)
@@ -82,7 +48,13 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
                     model_status = model_check_response.json()
                     model_exists = model_status.get("model_exists", False)
             except requests.RequestException as e:
-                print(f"⚠ Warning: Could not check model existence in app.py: {str(e)}")
+                log_message(f"Warning: Could not check model existence: {str(e)}")
+
+            with open(LOG_FILE, "a") as log_file:
+                log_file.write("Data cleaning started...\n")
+                log_file.flush()  # Ensure log is written immediately
+            print("Columns:", df.columns)
+            print(df.head())
 
             # Find duplicate rows
             duplicates = df[df.duplicated(keep=False)]  # keep=False includes all occurrences of duplicates
@@ -302,25 +274,14 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
             # 13. **Average_Storey: Convert to numeric
             df['Average_Storey'] = pd.to_numeric(df['Average_Storey'])
 
-            print("✅ Data cleaning completed. Processing next step...")
+            log_message("Data cleaning completed.")
 
-            # # Send cleaned data to Model Training
-            # try:
-            #     response = requests.post(MODEL_SERVER_URL, data=payload, headers={'Content-Type': 'application/json'})
-            #     if response.status_code == 200:
-            #         print("Data sent successfully to model training!")
-            #     else:
-            #         print(f"Failed to send data to model server: {response.status_code}", response.text)
-            # except requests.RequestException as e:
-            #     print(f"Error sending data to model server: {str(e)}")
-
-            # 🔹 If model exists, send cleaned data back to app.py
             if model_exists:
                 cleaned_data = df.to_dict(orient='records')
                 payload = json.dumps({"cleaned_data": cleaned_data})
                 response = requests.post(APP_SERVER_URL, data=payload, headers={'Content-Type': 'application/json'})
                 response.raise_for_status()
-                print("✅ Successfully sent cleaned forecasting data back to app.py!")
+                print("Successfully sent cleaned forecasting data back to app.py!")
 
             # 🔹 If no model exists, send cleaned data to data_modelling.py
             else:
@@ -330,19 +291,33 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
                 payload = json.dumps({"X_train": X_train, "y_train": y_train})
                 response = requests.post(MODEL_SERVER_URL, data=payload, headers={'Content-Type': 'application/json'})
                 response.raise_for_status()
-                print("✅ Successfully sent cleaned training data to data_modelling.py!")
+                print("Successfully sent cleaned training data to data_modelling.py!")
 
-            # Success Response
             self.send_response(200)
             self.end_headers()
             self.wfile.write(json.dumps({"message": "Data processed and sent successfully"}).encode())
-            
 
         except Exception as e:
-            print(f"❌ Error in data cleaning: {str(e)}")
+            log_message(f"Error: {str(e)}")
             self.send_response(500)
             self.end_headers()
             self.wfile.write(json.dumps({'error': str(e)}).encode())
+
+    def do_GET(self):
+        """Serves the log content when the client requests it."""
+        if self.path == "/logs":
+            try:
+                with open(LOG_FILE, "r") as log_file:
+                    log_content = log_file.read()
+            except FileNotFoundError:
+                log_content = "No logs available yet."
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain')
+            self.send_header('Access-Control-Allow-Origin', '*')  # Allow all origins
+            self.end_headers()
+            self.wfile.write(log_content.encode())
+
 
 if __name__ == "__main__":
     with socketserver.TCPServer(("", PORT), FileReceiverHandler) as httpd:
