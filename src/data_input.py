@@ -73,4 +73,8 @@ def upload_file():
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     app.run(debug=True,port=5000)
+=======
+    app.run(debug=True, port=5000)
+>>>>>>> eb032895014f0b4452f5e100aa5d314860a268a7

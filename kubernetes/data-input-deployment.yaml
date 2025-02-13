@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-input-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-input
+  template:
+    metadata:
+      labels:
+        app: data-input
+    spec:
+      containers:
+      - name: data-input
+        image: terenceyew/data-input:latest
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-input
+spec:
+  selector:
+    app: data-input
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000
+  type: LoadBalancer
