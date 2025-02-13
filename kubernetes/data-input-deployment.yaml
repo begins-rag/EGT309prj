@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: data-input
-        image: terenceyew/data-input:latest
+        image: pitzaheart/data-input:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5000

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: terenceyew/app:latest  # Ensure this matches your Docker Hub image
+        image: pitzaheart/app:latest  # Ensure this matches your Docker Hub image
         imagePullPolicy: Always
         ports:
         - containerPort: 5010
