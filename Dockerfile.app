@@ -1,7 +1,10 @@
 FROM python:3.9
-WORKDIR /app
+
+WORKDIR /EGT309prj/EGT309prj
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 5010
+
+FROM base AS app
+COPY app.py .
 CMD ["python", "app.py"]
