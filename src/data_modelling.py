@@ -68,11 +68,7 @@ class ModelTrainingServer(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({'error': str(e)}).encode())
 
 if __name__ == '__main__':
-<<<<<<< HEAD
-    run(port=5002)  # Change port if needed
-=======
     server_address = ('', 5002)  # Running on port 5002
     httpd = HTTPServer(server_address, ModelTrainingServer)
     print("Model server running on port 5002...")
     httpd.serve_forever()
->>>>>>> eb032895014f0b4452f5e100aa5d314860a268a7
