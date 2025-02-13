@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: yourdockerhubusername/app:latest
+        image: thaqif101/app:latest
         ports:
         - containerPort: 5010
         env:
