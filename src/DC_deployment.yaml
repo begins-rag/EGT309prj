@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-cleaning-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-cleaning-app
+  template:
+    metadata:
+      labels:
+        app: data-cleaning-app
+    spec:
+      containers:
+      - name: data-cleaning
+        image: roshh72/my-data-cleaning-app:latest
+        ports:
+        - containerPort: 5001
