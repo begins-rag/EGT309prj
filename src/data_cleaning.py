@@ -22,6 +22,10 @@ def log_message(message):
     print(message)  # Still print for debugging
 
 
+with open(LOG_FILE, "a") as log_file:
+    log_file.write("Cleaning application has started")
+    log_file.flush()  # Immediately flush the content to the file
+
 class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         try:

@@ -1,20 +1,5 @@
-Received a file for processing.
-Warning: Could not check model existence: HTTPConnectionPool(host='app-service', port=5010): Max retries exceeded with url: /check_model (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x000001E8B70E43A0>: Failed to resolve 'app-service' ([Errno 11001] getaddrinfo failed)"))
+Cleaning application has startedReceived a file for processing.
+Warning: Could not check model existence: HTTPConnectionPool(host='app-service', port=5010): Max retries exceeded with url: /check_model (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x0000021ADB4185E0>: Failed to resolve 'app-service' ([Errno 11001] getaddrinfo failed)"))
 Data cleaning started...
 Data cleaning completed.
-Error: HTTPConnectionPool(host='data-modelling-service', port=5002): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x000001E8B7FABC40>: Failed to resolve 'data-modelling-service' ([Errno 11001] getaddrinfo failed)"))
-Received a file for processing.
-Warning: Could not check model existence: HTTPConnectionPool(host='app-service', port=5010): Max retries exceeded with url: /check_model (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x000001E8B7FAA650>: Failed to resolve 'app-service' ([Errno 11001] getaddrinfo failed)"))
-Data cleaning started...
-Data cleaning completed.
-Error: HTTPConnectionPool(host='data-modelling-service', port=5002): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x000001E8D0585030>: Failed to resolve 'data-modelling-service' ([Errno 11001] getaddrinfo failed)"))
-Received a file for processing.
-Warning: Could not check model existence: HTTPConnectionPool(host='app-service', port=5010): Max retries exceeded with url: /check_model (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x000001E8D0586620>: Failed to resolve 'app-service' ([Errno 11001] getaddrinfo failed)"))
-Data cleaning started...
-Data cleaning completed.
-Error: HTTPConnectionPool(host='data-modelling-service', port=5002): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x000001E8C3CCF6D0>: Failed to resolve 'data-modelling-service' ([Errno 11001] getaddrinfo failed)"))
-Received a file for processing.
-Warning: Could not check model existence: HTTPConnectionPool(host='app-service', port=5010): Max retries exceeded with url: /check_model (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x000001E8C3CCFA60>: Failed to resolve 'app-service' ([Errno 11001] getaddrinfo failed)"))
-Data cleaning started...
-Data cleaning completed.
-Error: HTTPConnectionPool(host='data-modelling-service', port=5002): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x000001E8DA8636D0>: Failed to resolve 'data-modelling-service' ([Errno 11001] getaddrinfo failed)"))
+Error: HTTPConnectionPool(host='data-modelling-service', port=5002): Max retries exceeded with url: / (Caused by NameResolutionError("<urllib3.connection.HTTPConnection object at 0x0000021ADDA1BCA0>: Failed to resolve 'data-modelling-service' ([Errno 11001] getaddrinfo failed)"))
