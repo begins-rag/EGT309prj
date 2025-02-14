@@ -8,6 +8,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 APP_SERVER_URL = "http://app-service:5010/upload_model"  # URL of the app.py service
 CLEAN_SERVER_URL = "http://data-cleaning-service:5001"  # URL of the app.py service
+MODEL_PATH = "/mnt/models/lightgbm_model.pkl"  # Save in Persistent Volume
 # APP_SERVER_URL = "http://localhost:5010/upload_model"  # URL of the app.py service
 # CLEAN_SERVER_URL = "http://localhost:5001"  # URL of the app.py service
 
@@ -44,11 +45,11 @@ class ModelTrainingServer(BaseHTTPRequestHandler):
             print(f"Best LightGBM RMSE: {-lgb_grid.best_score_:.2f}")
 
             # Save model temporarily
-            model_filename = "lightgbm_model.pkl"
-            joblib.dump(lgb_grid.best_estimator_, model_filename)
+            # model_filename = "lightgbm_model.pkl"
+            joblib.dump(lgb_grid.best_estimator_, MODEL_PATH)
 
             # Send model to app.py
-            files = {'file': open(model_filename, 'rb')}
+            files = {'file': open(MODEL_PATH, 'rb')}
             response = requests.post(APP_SERVER_URL, files=files)
             # response = requests.post(CLEAN_SERVER_URL, files=files)
 
@@ -56,7 +57,7 @@ class ModelTrainingServer(BaseHTTPRequestHandler):
                 print("Model successfully sent to app.py")
             else:
                 print("Failed to send model:", response.text)
-
+            print("Data Modelling Process Success!")
             # Send success response
             self.send_response(200)
             self.send_header('Content-type', 'application/json')

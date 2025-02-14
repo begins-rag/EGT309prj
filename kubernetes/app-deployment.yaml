@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: app-deployment
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: app
@@ -14,17 +14,24 @@ spec:
     spec:
       containers:
       - name: app
-        image: terenceyew/app:latest  # Ensure this matches your Docker Hub image
+        image: terenceyew/app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5010
         env:
         - name: DATA_CLEANING_URL
-          value: "http://host.docker.internal:5001"
+          value: "http://data-cleaning-service:5001"
         - name: DATA_MODELLING_URL
-          value: "http://host.docker.internal:5002"
+          value: "http://data-modelling-service:5002"
         - name: DATA_INPUT_URL
-          value: "http://host.docker.internal:5000"
+          value: "http://data-input-service:5000"
+        volumeMounts:
+        - name: model-storage
+          mountPath: "/mnt/models"  # Inside container
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-pvc
 
 ---
 apiVersion: v1
@@ -38,5 +45,4 @@ spec:
     - protocol: TCP
       port: 5010
       targetPort: 5010
-      # nodePort: 30007  # Choose a port between 30000-32767
   type: LoadBalancer

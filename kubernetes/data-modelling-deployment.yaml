@@ -17,6 +17,13 @@ spec:
         image: terenceyew/data-modelling:latest
         ports:
         - containerPort: 5002
+        volumeMounts:
+        - name: model-storage
+          mountPath: "/mnt/models"  # Inside container
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-pvc
         
 ---
 apiVersion: v1

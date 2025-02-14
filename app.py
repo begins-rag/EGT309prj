@@ -4,6 +4,8 @@ import joblib
 import numpy as np
 import io
 import requests
+import os
+import lightgbm as lgb
 
 app = Flask(__name__)
 
@@ -11,6 +13,7 @@ app = Flask(__name__)
 model = None
 
 # URL of data_cleaning.py service
+MODEL_PATH = "/mnt/models/lightgbm_model.pkl"  # Persistent Volume Path
 DATA_CLEANING_URL = "http://data-cleaning-service:5001/clean-data"
 # DATA_CLEANING_URL = "http://localhost:5001/clean-data"
 
@@ -19,38 +22,44 @@ def home():
     """Render the homepage."""
     return render_template('K8sUI.html')
 
+# def load_model():
+#     global model
+#     if os.path.exists(MODEL_PATH):
+#         print("✅ Loading model from Persistent Volume...")
+#         model = joblib.load(MODEL_PATH)
+#         print("✅ Model Loaded Successfully")
+#     else:
+#         print("❌ Model file not found!")
+
 @app.route('/upload_model', methods=['POST'])
 def upload_model():
     """
-    Receive the trained model file from data_modelling.py
-    and load it into memory.
+    Check if a model is currently loaded in memory.
     """
     global model
 
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
-
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-
-    try:
-        # Load model into memory from in-memory file
-        model = joblib.load(io.BytesIO(file.read()))
-        print("✅ Model successfully loaded into memory!")
-        return jsonify({'message': 'Model uploaded and loaded successfully'}), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/check_model', methods=['GET'])
-def check_model():
-    """
-    Check if a model is currently loaded in memory.
-    """
     if model is None:
-        return jsonify({'model_loaded': False, 'message': 'No model is currently loaded'}), 200
-    return jsonify({'model_loaded': True, 'message': 'A model is currently loaded and ready for predictions'}), 200
+        # Try loading from persistent volume
+        if os.path.exists(MODEL_PATH):
+            try:
+                model = joblib.load(MODEL_PATH)
+                print("✅ Model loaded from persistent volume!")
+                return jsonify({'model_loaded': True, 'message': 'Model loaded from PV'}), 200
+            except Exception as e:
+                return jsonify({'model_loaded': False, 'error': f'Failed to load model from PV: {str(e)}'}), 500
+        else:
+            return jsonify({'model_loaded': False, 'message': 'No model found in PV'}), 200
+
+    return jsonify({'model_loaded': True, 'message': 'A model is already loaded'}), 200
+
+# @app.route('/check_model', methods=['GET'])
+# def check_model():
+#     """
+#     Check if a model is currently loaded in memory.
+#     """
+#     if model is None:
+#         return jsonify({'model_loaded': False, 'message': 'No model is currently loaded'}), 200
+#     return jsonify({'model_loaded': True, 'message': 'A model is currently loaded and ready for predictions'}), 200
 
 def preprocess_data(df):
     """
