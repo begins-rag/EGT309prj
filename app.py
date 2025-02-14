@@ -12,6 +12,7 @@ model = None
 
 # URL of data_cleaning.py service
 DATA_CLEANING_URL = "http://data-cleaning-service:5001/clean-data"
+# DATA_CLEANING_URL = "http://localhost:5001/clean-data"
 
 @app.route('/')
 def home():
@@ -107,7 +108,7 @@ def generate_forecast():
         #     return jsonify({'error': 'No cleaned data received'}), 500
 
         cleaned_df = pd.DataFrame(raw_df)
-        print("✅ Received cleaned data for preprocessing and forecasting")
+        # print("✅ Received cleaned data for preprocessing and forecasting")
 
         # Step 3: Preprocess cleaned data
         processed_df, original_prices = preprocess_data(cleaned_df)

@@ -55,6 +55,7 @@ def upload_file():
 
     # Send the file to the data cleaning service via a POST request
     backend_url = 'http://data-cleaning-service:5001/clean-data'  # data_cleaning.py URL
+    # backend_url = 'http://localhost:5001/clean-data'  # data_cleaning.py URL
     try:
         response = requests.post(
             backend_url,

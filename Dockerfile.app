@@ -9,7 +9,7 @@ WORKDIR /app
 # Copy the application script
 COPY app.py ./
 COPY templates/ ./templates
-COPY models/ ./models
+# COPY models/ ./models
 COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
