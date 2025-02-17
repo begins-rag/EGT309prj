@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: data-cleaning-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: data-cleaning
