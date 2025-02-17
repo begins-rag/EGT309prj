@@ -14,12 +14,25 @@ spec:
     spec:
       containers:
       - name: app
-        image: terenceyew/app:latest 
+        image: terenceyew/app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5010
         env:
         - name: DATA_CLEANING_URL
-          value: "http://data-cleaning:5001/clean-data"
+          value: "http://data-cleaning-service:5001"
+        - name: DATA_MODELLING_URL
+          value: "http://data-modelling-service:5002"
+        - name: DATA_INPUT_URL
+          value: "http://data-input-service:5000"
+        volumeMounts:
+        - name: model-storage
+          mountPath: "/mnt/models"  # Inside container
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-pvc
+
 ---
 apiVersion: v1
 kind: Service
@@ -29,7 +42,7 @@ spec:
   selector:
     app: app
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 5010
+    - protocol: TCP
+      port: 5010
+      targetPort: 5010
   type: LoadBalancer

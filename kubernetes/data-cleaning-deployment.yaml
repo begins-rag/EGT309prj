@@ -21,7 +21,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: data-cleaning
+  name: data-cleaning-service
 spec:
   selector:
     app: data-cleaning
