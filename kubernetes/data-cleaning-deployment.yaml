@@ -1,34 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: data-cleaning-deployment
+  name: data-input-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: data-cleaning
+      app: data-input
   template:
     metadata:
       labels:
-        app: data-cleaning
+        app: data-input
     spec:
       containers:
-      - name: data-cleaning
-
-        image: pitzaheart/data-cleaning:latest
-
+      - name: data-input
+        image: pitzaheart/data-input:latest
+        imagePullPolicy: Always
         ports:
-        - containerPort: 5001
+        - containerPort: 5000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: data-cleaning-service
+  name: data-input-service
 spec:
   selector:
-    app: data-cleaning
+    app: data-input
   ports:
   - protocol: TCP
-    port: 5001
-    targetPort: 5001
-  type: ClusterIP
+    port: 5000
+    targetPort: 5000
+  type: LoadBalancer
