@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: data-modelling
-        image: terenceyew/data-modelling:latest
+        image: thaqif101/data-modelling:latest
         ports:
         - containerPort: 5002
         volumeMounts:

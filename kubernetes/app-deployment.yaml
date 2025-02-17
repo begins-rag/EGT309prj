@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: terenceyew/app:latest
+        image: thaqif101/app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5010
