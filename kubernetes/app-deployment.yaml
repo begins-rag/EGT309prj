@@ -25,6 +25,23 @@ spec:
           value: "http://host.docker.internal:5002"
         - name: DATA_INPUT_URL
           value: "http://host.docker.internal:5000"
+          value: "http://data-input-service:5000"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4317"
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: "http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:4318"
+        - name: OTEL_EXPORTER_ZIPKIN_ENDPOINT
+          value: "http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:9411"
+        - name: OTEL_SERVICE_NAME
+          value: "app-monitor-service"
+        volumeMounts:
+        - name: model-storage
+          mountPath: "/mnt/models"  # Inside container
+      volumes:
+      - name: model-storage
+        persistentVolumeClaim:
+          claimName: model-pvc
+
 
 ---
 apiVersion: v1
