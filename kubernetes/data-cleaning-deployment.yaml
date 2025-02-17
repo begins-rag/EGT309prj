@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: data-cleaning
-        image: thaqif101/data-cleaning:latest
+        image: pitzaheart/data-cleaning:latest
         ports:
         - containerPort: 5001
 ---
