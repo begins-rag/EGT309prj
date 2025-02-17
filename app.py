@@ -4,6 +4,8 @@ import joblib
 import numpy as np
 import io
 import requests
+import os
+import lightgbm as lgb
 
 app = Flask(__name__)
 
@@ -11,45 +13,56 @@ app = Flask(__name__)
 model = None
 
 # URL of data_cleaning.py service
-DATA_CLEANING_URL = "http://localhost:5001/clean-data"
+MODEL_PATH = "/mnt/models/lightgbm_model.pkl"  # Persistent Volume Path
+DATA_CLEANING_URL = "http://data-cleaning-service:5001/clean-data"
+# DATA_CLEANING_URL = "http://localhost:5001/clean-data"
 
 @app.route('/')
 def home():
     """Render the homepage."""
     return render_template('K8sUI.html')
+<<<<<<< HEAD
+=======
+
+# def load_model():
+#     global model
+#     if os.path.exists(MODEL_PATH):
+#         print("✅ Loading model from Persistent Volume...")
+#         model = joblib.load(MODEL_PATH)
+#         print("✅ Model Loaded Successfully")
+#     else:
+#         print("❌ Model file not found!")
+>>>>>>> 6ec06e40241a5a03ca1e4cd119f556e5d20dae52
 
 @app.route('/upload_model', methods=['POST'])
 def upload_model():
     """
-    Receive the trained model file from data_modelling.py
-    and load it into memory.
+    Check if a model is currently loaded in memory.
     """
     global model
 
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
-
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-
-    try:
-        # Load model into memory from in-memory file
-        model = joblib.load(io.BytesIO(file.read()))
-        print("✅ Model successfully loaded into memory!")
-        return jsonify({'message': 'Model uploaded and loaded successfully'}), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/check_model', methods=['GET'])
-def check_model():
-    """
-    Check if a model is currently loaded in memory.
-    """
     if model is None:
-        return jsonify({'model_loaded': False, 'message': 'No model is currently loaded'}), 200
-    return jsonify({'model_loaded': True, 'message': 'A model is currently loaded and ready for predictions'}), 200
+        # Try loading from persistent volume
+        if os.path.exists(MODEL_PATH):
+            try:
+                model = joblib.load(MODEL_PATH)
+                print("✅ Model loaded from persistent volume!")
+                return jsonify({'model_loaded': True, 'message': 'Model loaded from PV'}), 200
+            except Exception as e:
+                return jsonify({'model_loaded': False, 'error': f'Failed to load model from PV: {str(e)}'}), 500
+        else:
+            return jsonify({'model_loaded': False, 'message': 'No model found in PV'}), 200
+
+    return jsonify({'model_loaded': True, 'message': 'A model is already loaded'}), 200
+
+# @app.route('/check_model', methods=['GET'])
+# def check_model():
+#     """
+#     Check if a model is currently loaded in memory.
+#     """
+#     if model is None:
+#         return jsonify({'model_loaded': False, 'message': 'No model is currently loaded'}), 200
+#     return jsonify({'model_loaded': True, 'message': 'A model is currently loaded and ready for predictions'}), 200
 
 def preprocess_data(df):
     """
@@ -107,7 +120,7 @@ def generate_forecast():
         #     return jsonify({'error': 'No cleaned data received'}), 500
 
         cleaned_df = pd.DataFrame(raw_df)
-        print("✅ Received cleaned data for preprocessing and forecasting")
+        # print("✅ Received cleaned data for preprocessing and forecasting")
 
         # Step 3: Preprocess cleaned data
         processed_df, original_prices = preprocess_data(cleaned_df)
@@ -135,4 +148,8 @@ def generate_forecast():
 
 if __name__ == '__main__':
     print("🚀 Starting Forecasting Service on Port 5010...")
+<<<<<<< HEAD
     app.run(host="0.0.0.0", port=5010, debug=True)
+=======
+    app.run(debug=True, host="0.0.0.0", port=5010, threaded=True)
+>>>>>>> 6ec06e40241a5a03ca1e4cd119f556e5d20dae52
