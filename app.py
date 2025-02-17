@@ -21,8 +21,6 @@ DATA_CLEANING_URL = "http://data-cleaning-service:5001/clean-data"
 def home():
     """Render the homepage."""
     return render_template('K8sUI.html')
-<<<<<<< HEAD
-=======
 
 # def load_model():
 #     global model
@@ -32,7 +30,6 @@ def home():
 #         print("✅ Model Loaded Successfully")
 #     else:
 #         print("❌ Model file not found!")
->>>>>>> 6ec06e40241a5a03ca1e4cd119f556e5d20dae52
 
 @app.route('/upload_model', methods=['POST'])
 def upload_model():
@@ -148,8 +145,4 @@ def generate_forecast():
 
 if __name__ == '__main__':
     print("🚀 Starting Forecasting Service on Port 5010...")
-<<<<<<< HEAD
-    app.run(host="0.0.0.0", port=5010, debug=True)
-=======
     app.run(debug=True, host="0.0.0.0", port=5010, threaded=True)
->>>>>>> 6ec06e40241a5a03ca1e4cd119f556e5d20dae52
