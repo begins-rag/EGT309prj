@@ -14,7 +14,9 @@ spec:
     spec:
       containers:
       - name: data-input
+
         image: pitzaheart/data-input:latest
+
         imagePullPolicy: Always
         ports:
         - containerPort: 5000

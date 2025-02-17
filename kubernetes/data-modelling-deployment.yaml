@@ -14,7 +14,9 @@ spec:
     spec:
       containers:
       - name: data-modelling
+
         image: pitzaheart/data-modelling:latest
+
         ports:
         - containerPort: 5002
         

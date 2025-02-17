@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: pitzaheart/app:latest  # Ensure this matches your Docker Hub image
+        image: pitzaheart/app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5010
