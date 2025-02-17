@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: data-input-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: data-input
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: data-input
-        image: pitzaheart/data-input:latest
+        image: thaqif101/data-input:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5000

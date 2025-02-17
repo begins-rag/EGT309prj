@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: data-modelling-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: data-modelling
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: data-modelling
-        image: pitzaheart/data-modelling:latest
+        image: thaqif101/data-modelling:latest
         ports:
         - containerPort: 5002
         volumeMounts:

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: data-cleaning-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: data-cleaning
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: data-cleaning
-        image: pitzaheart/data-cleaning:latest
+        image: thaqif101/data-cleaning:latest
         ports:
         - containerPort: 5001
 ---

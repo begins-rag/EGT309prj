@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: app-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: app
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: pitzaheart/app:latest
+        image: thaqif101/app:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 5010
