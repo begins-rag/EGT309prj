@@ -6,6 +6,7 @@ from io import BytesIO
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from geopy.geocoders import Nominatim
+
 import requests
 
 PORT = 5001
@@ -25,6 +26,18 @@ def log_message(message):
 with open(LOG_FILE, "a") as log_file:
     log_file.write("Cleaning application has started")
     log_file.flush()  # Immediately flush the content to the file
+
+import requests  # For sending HTTP requests
+
+
+PORT = 5001
+MODEL_SERVER_URL = 'http://data-modelling-service:5002'  # Model training server
+APP_SERVER_URL = 'http://app-service:5010/receive_cleaned_data'  # UI (forecasting) server
+CHECK_MODEL_URL = 'http://app-service:5010/check_model'  # Endpoint to check if the model exists
+# MODEL_SERVER_URL = 'http://localhost:5002'  # Model training server
+# APP_SERVER_URL = 'http://localhost:5010/receive_cleaned_data'  # UI (forecasting) server
+# CHECK_MODEL_URL = 'http://localhost:5010/check_model'  # Endpoint to check if the model exists
+
 
 class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
@@ -306,6 +319,7 @@ class FileReceiverHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(500)
             self.end_headers()
             self.wfile.write(json.dumps({'error': str(e)}).encode())
+
 
     def do_GET(self):
         """Serves the log content when the client requests it."""
