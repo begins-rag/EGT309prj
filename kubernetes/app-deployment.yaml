@@ -87,3 +87,15 @@ spec:
       target:
         type: Utilization
         averageUtilization: 50  # Scale when CPU usage exceeds 50%
+
+---
+# At least 1 pod must always be running
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: app-pdb
+spec:
+  minAvailable: 1  
+  selector:
+    matchLabels:
+      app: app
