@@ -4,6 +4,11 @@ metadata:
   name: app-deployment
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate  # Enables rollout and rollback
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: app
@@ -12,6 +17,7 @@ spec:
       labels:
         app: app
     spec:
+      restartPolicy: Always  # ✅ Auto-recovery enabled
       containers:
       - name: app
         image: thaqif101/app:latest
@@ -33,9 +39,16 @@ spec:
           value: "http://grafana-k8s-monitoring-alloy-receiver.default.svc.cluster.local:9411"
         - name: OTEL_SERVICE_NAME
           value: "app-monitor-service"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         volumeMounts:
         - name: model-storage
-          mountPath: "/mnt/models"  # Inside container
+          mountPath: "/mnt/models"
       volumes:
       - name: model-storage
         persistentVolumeClaim:
@@ -54,3 +67,23 @@ spec:
       port: 5010
       targetPort: 5010
   type: LoadBalancer
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app-deployment
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50  # Scale when CPU usage exceeds 50%
